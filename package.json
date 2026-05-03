@@ -1,0 +1,14 @@
+{
+  "name": "natookart-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm start",
+    "dev:main": "cd frontend/main && npm run dev",
+    "dev:admin": "cd frontend/admin && npm run dev",
+    "start": "concurrently --prefix \"[{name}]\" --names \"BACKEND,MAIN,ADMIN\" --prefix-colors \"yellow,cyan,magenta\" \"npm run dev:backend\" \"npm run dev:main\" \"npm run dev:admin\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
