@@ -6,6 +6,7 @@
     "dev:backend": "cd backend && npm start",
     "dev:main": "cd frontend/main && npm run dev",
     "dev:admin": "cd frontend/admin && npm run dev",
+    "build": "cd frontend/main && npm install && npm run build",
     "start": "concurrently --prefix \"[{name}]\" --names \"BACKEND,MAIN,ADMIN\" --prefix-colors \"yellow,cyan,magenta\" \"npm run dev:backend\" \"npm run dev:main\" \"npm run dev:admin\""
   },
   "devDependencies": {
