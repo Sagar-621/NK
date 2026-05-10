@@ -37,20 +37,19 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
             ? 'glass border-b border-white/30 shadow-lg shadow-black/5'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo — company-logo.png */}
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group overflow-visible">
               <img
                 src="/logos/company-logo.png"
                 alt="NatooKart — India's Local Shopping App"
-                className="h-16 sm:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                className="h-32 sm:h-48 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
 
@@ -61,8 +60,7 @@ export default function Navbar() {
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
-                    `relative px-4 py-2 text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-[1.02] ${
-                      isActive ? 'text-primary' : textColor
+                    `relative px-4 py-2 text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-[1.02] ${isActive ? 'text-primary' : textColor
                     }`
                   }
                 >
@@ -126,7 +124,7 @@ export default function Navbar() {
               <div className="flex flex-col h-full p-6">
                 <div className="flex justify-between items-center mb-8">
                   <Link to="/" onClick={() => setMobileOpen(false)}>
-                    <img src="/logos/company-logo.png" alt="NatooKart" className="h-14 w-auto object-contain" />
+                    <img src="/logos/company-logo.png" alt="NatooKart" className="h-28 w-auto object-contain" />
                   </Link>
                   <button
                     onClick={() => setMobileOpen(false)}
@@ -148,8 +146,7 @@ export default function Navbar() {
                       <NavLink
                         to={link.to}
                         className={({ isActive }) =>
-                          `block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                            isActive ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50'
+                          `block px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-50'
                           }`
                         }
                       >

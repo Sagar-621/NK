@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Store, Bike, Briefcase, MessageSquare, TrendingUp, Clock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Store, Bike, Briefcase, MessageSquare, TrendingUp, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api'
+import { SkeletonDashboard } from '../components/Skeleton'
 
 const typeIcons = {
   approved_merchant:  <CheckCircle2 size={16} className="text-green-500" />,
@@ -40,11 +41,7 @@ export default function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-32">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
-  )
+  if (loading) return <SkeletonDashboard />
 
   if (error) return (
     <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-sm">{error}</div>

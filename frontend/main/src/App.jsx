@@ -18,10 +18,41 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-gray-400 text-sm font-medium">Loading...</p>
+    <div className="min-h-screen bg-white">
+      {/* Skeleton Navbar */}
+      <div className="h-20 border-b border-gray-100 flex items-center px-8">
+        <div className="w-32 h-8 bg-gray-100 rounded-xl animate-pulse" />
+        <div className="ml-auto flex gap-6">
+          {[1,2,3,4].map(i => <div key={i} className="w-16 h-4 bg-gray-50 rounded-md animate-pulse" />)}
+        </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
+        {/* Skeleton Hero */}
+        <div className="max-w-2xl space-y-6">
+          <div className="w-24 h-6 bg-secondary/10 rounded-full animate-pulse" />
+          <div className="space-y-3">
+            <div className="w-full h-12 bg-gray-100 rounded-2xl animate-pulse" />
+            <div className="w-3/4 h-12 bg-gray-100 rounded-2xl animate-pulse" />
+          </div>
+          <div className="w-full h-20 bg-gray-50 rounded-2xl animate-pulse" />
+          <div className="flex gap-4">
+            <div className="w-36 h-12 bg-navy/10 rounded-xl animate-pulse" />
+            <div className="w-36 h-12 bg-navy/10 rounded-xl animate-pulse" />
+          </div>
+        </div>
+
+        {/* Skeleton Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1,2,3].map(i => (
+            <div key={i} className="space-y-4">
+              <div className="w-full h-48 bg-gray-100 rounded-3xl animate-pulse" />
+              <div className="w-40 h-6 bg-gray-100 rounded-lg animate-pulse" />
+              <div className="w-full h-4 bg-gray-50 rounded-md animate-pulse" />
+              <div className="w-2/3 h-4 bg-gray-50 rounded-md animate-pulse" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

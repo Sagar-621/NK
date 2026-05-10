@@ -1,10 +1,11 @@
-import { useState, useMemo, forwardRef, useRef } from 'react'
+import { useState, useMemo, useEffect, forwardRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Check, ChevronLeft, ChevronRight, Upload, Store, User, MapPin, FileCheck } from 'lucide-react'
 import Button from '../components/ui/Button'
+import { SubmittingSkeleton } from '../components/ui/Skeleton'
 
 // ===== VALIDATION SCHEMAS =====
 const step1Schema = z.object({
@@ -168,6 +169,22 @@ const FloatingPhoneInput = ({ value, onChange, error, label = 'Mobile Number' })
   const [country, setCountry] = useState(COUNTRY_CODES[0])
   const [digits, setDigits] = useState('')
 
+  useEffect(() => {
+    if (!value) {
+      setCountry(COUNTRY_CODES[0])
+      setDigits('')
+      return
+    }
+
+    const matchedCountry = COUNTRY_CODES.find((c) => value.startsWith(c.dial)) || COUNTRY_CODES[0]
+    const dialDigits = matchedCountry.dial.replace(/\D/g, '').length
+    const rawDigits = value.replace(/\D/g, '')
+    const nextDigits = rawDigits.slice(dialDigits, dialDigits + matchedCountry.max)
+
+    setCountry(matchedCountry)
+    setDigits(nextDigits)
+  }, [value])
+
   const handleCountryChange = (e) => {
     const selected = COUNTRY_CODES.find(c => `${c.dial}_${c.name}` === e.target.value)
     if (selected) {
@@ -230,43 +247,59 @@ export default function BecomeMerchant() {
   const [currentStep, setCurrentStep] = useState(0)
   const [allData, setAllData] = useState({})
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [fileName, setFileName] = useState('')
+  const [idProofFile, setIdProofFile] = useState(null)
+  const [idProofPreview, setIdProofPreview] = useState('')
   const [formError, setFormError] = useState('')
-
-  const isReviewStep = currentStep === 3
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    getValues,
     control,
-    setValue,
-    trigger,
   } = useForm({
     resolver: currentStep < 3 ? zodResolver(schemas[currentStep]) : undefined,
     mode: 'onChange',
   })
 
+  useEffect(() => {
+    if (currentStep < 3) {
+      reset(allData)
+    }
+  }, [allData, currentStep, reset])
+
+  useEffect(() => {
+    if (!idProofFile) {
+      setIdProofPreview('')
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(idProofFile)
+    setIdProofPreview(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [idProofFile])
+
   const onNext = (data) => {
     const merged = { ...allData, ...data }
     setAllData(merged)
+    reset(merged)
 
     if (currentStep < 3) {
       setCurrentStep((s) => s + 1)
-      reset()
     }
   }
 
   const onBack = () => {
     if (currentStep > 0) {
       setCurrentStep((s) => s - 1)
-      reset()
     }
   }
 
   const onFinalSubmit = async () => {
+    setIsSubmitting(true)
+    setFormError('')
     try {
       const hours = allData.operatingHours || '8 AM – 8 PM'
       const [openFrom, openTo] = hours.includes('24') ? ['00:00', '23:59'] : (() => {
@@ -275,27 +308,29 @@ export default function BecomeMerchant() {
         return [to24(parts[0] || '8 AM'), to24(parts[1] || '8 PM')]
       })()
 
+      const formData = new FormData()
+      formData.append('store_name', allData.storeName || '')
+      formData.append('business_type', allData.businessType || '')
+      formData.append('gstin', allData.gstin || '')
+      formData.append('pan', allData.pan || '')
+      formData.append('years_in_biz', allData.yearsInBusiness || '')
+      formData.append('owner_name', allData.ownerName || '')
+      formData.append('mobile', allData.mobile || '')
+      formData.append('email', allData.email || '')
+      formData.append('address_line1', allData.address1 || '')
+      formData.append('address_line2', allData.address2 || '')
+      formData.append('city', allData.city || '')
+      formData.append('state', allData.state || '')
+      formData.append('pin_code', allData.pin || '')
+      formData.append('open_from', openFrom)
+      formData.append('open_to', openTo)
+      formData.append('status', 'pending')
+      formData.append('operating_hours', hours)
+      if (idProofFile) formData.append('id_proof', idProofFile)
+
       const res = await fetch('/api/merchants', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          store_name: allData.storeName,
-          business_type: allData.businessType,
-          gstin: allData.gstin,
-          pan: allData.pan,
-          years_in_biz: allData.yearsInBusiness,
-          owner_name: allData.ownerName,
-          mobile: allData.mobile,
-          email: allData.email,
-          address_line1: allData.address1,
-          address_line2: allData.address2 || null,
-          city: allData.city,
-          state: allData.state,
-          pin_code: allData.pin,
-          open_from: openFrom,
-          open_to: openTo,
-          status: 'pending',
-        }),
+        body: formData,
       })
       if (!res.ok) {
         const errorData = await res.json()
@@ -305,13 +340,14 @@ export default function BecomeMerchant() {
     } catch (err) {
       console.error('Merchant form error:', err)
       setFormError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const goToStep = (step) => {
     if (step < currentStep) {
       setCurrentStep(step)
-      reset()
     }
   }
 
@@ -344,8 +380,8 @@ export default function BecomeMerchant() {
       {/* Form */}
       <section className="py-20 bg-[#F8FAFC] min-h-[80vh]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          {/* Progress Bar */}
-          {!isSubmitted && (
+          {/* Progress Bar — hidden while submitting or after success */}
+          {!isSubmitted && !isSubmitting && (
             <div className="mb-12">
               <div className="relative flex items-center justify-between">
                 {/* Background line */}
@@ -381,7 +417,17 @@ export default function BecomeMerchant() {
 
           {/* Card */}
           <AnimatePresence mode="wait">
-            {isSubmitted ? (
+            {isSubmitting ? (
+              <motion.div
+                key="submitting"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35 }}
+              >
+                <SubmittingSkeleton label="Submitting your merchant application…" />
+              </motion.div>
+            ) : isSubmitted ? (
               <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -473,9 +519,18 @@ export default function BecomeMerchant() {
                           type="file"
                           className="hidden"
                           accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null
+                            setIdProofFile(file)
+                            setFileName(file?.name || '')
+                          }}
                         />
                       </label>
+                      {idProofPreview && idProofFile?.type?.startsWith('image/') && (
+                        <div className="mt-3 rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                          <img src={idProofPreview} alt="Selected ID proof preview" className="w-full max-h-48 object-cover" />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex justify-between pt-4">
@@ -584,7 +639,7 @@ export default function BecomeMerchant() {
                       <Button type="button" variant="ghost" size="md" onClick={onBack}>
                         <ChevronLeft size={18} className="mr-1" /> Back
                       </Button>
-                      <Button type="button" variant="primary" size="lg" onClick={onFinalSubmit}>
+                      <Button type="button" variant="primary" size="lg" onClick={onFinalSubmit} disabled={isSubmitting}>
                         Submit Application
                       </Button>
                     </div>

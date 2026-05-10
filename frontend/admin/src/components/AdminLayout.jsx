@@ -9,6 +9,7 @@ const pageTitles = {
   '/merchants': 'Merchants',
   '/delivery-partners': 'Delivery Partners',
   '/jobs': 'Job Postings',
+  '/job-applications': 'Job Applications',
   '/contact-inquiries': 'Contact Inquiries',
   '/settings': 'Settings',
 }
@@ -29,13 +30,13 @@ export default function AdminLayout() {
   const title = pageTitles[location.pathname] || 'Admin'
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-white">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      {/* Main Content */}
-      <div className="lg:ml-16 xl:ml-64 transition-all duration-300">
+      {/* Main Content Area */}
+      <div className="lg:pl-16 xl:pl-64 transition-all duration-300 w-full flex flex-col min-h-screen">
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+        <header className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between px-4 sm:px-6 h-16">
             <div className="flex items-center gap-4">
               <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl text-gray-600">

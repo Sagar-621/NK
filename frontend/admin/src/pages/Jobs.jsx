@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { Search, Plus, Edit2, Trash2, ToggleLeft, ToggleRight, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { api } from '../api'
 import { useAuth } from '../context/AuthContext'
+import { SkeletonTable } from '../components/Skeleton'
 
 const statusColors = {
   draft:  'bg-gray-50 text-gray-600 border-gray-200',
@@ -86,12 +87,6 @@ export default function Jobs() {
     } catch (e) { alert(e.message) }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-32">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
-  )
-
   if (error) return (
     <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-sm">{error}</div>
   )
@@ -110,42 +105,47 @@ export default function Jobs() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead><tr className="border-b border-gray-100">{['#','Title','Department','Location','Type','Status','Deadline','Actions'].map(h => <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">{h}</th>)}</tr></thead>
-            <tbody>
-              {paginated.map(j => (
-                <tr key={j.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                  <td className="px-4 py-3 text-sm text-gray-400">{j.id}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-navy">{j.title}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{j.department}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{j.location}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{j.job_type}</td>
-                  <td className="px-4 py-3"><span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium border capitalize ${statusColors[j.status]}`}>{j.status}</span></td>
-                  <td className="px-4 py-3 text-xs text-gray-400">{j.deadline ? new Date(j.deadline).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => toggleStatus(j.id)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-primary" title="Toggle status">
-                        {j.status === 'active' ? <ToggleRight size={18} className="text-green-500" /> : <ToggleLeft size={18} />}
-                      </button>
-                      <button onClick={() => openEdit(j)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-blue-600"><Edit2 size={16} /></button>
-                      <button onClick={() => setDeleteConfirm(j.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600"><Trash2 size={16} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {paginated.length === 0 && <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-400 text-sm">No jobs found.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <p className="text-xs text-gray-400">Page {page} of {totalPages}</p>
-            <div className="flex gap-1"><button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronLeft size={16} /></button><button onClick={() => setPage(p => Math.min(totalPages,p+1))} disabled={page===totalPages} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronRight size={16} /></button></div>
+      {loading ? (
+        <SkeletonTable rows={5} cols={8}
+          headers={['#','Title','Department','Location','Type','Status','Deadline','Actions']} />
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead><tr className="border-b border-gray-100">{['#','Title','Department','Location','Type','Status','Deadline','Actions'].map(h => <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">{h}</th>)}</tr></thead>
+              <tbody>
+                {paginated.map(j => (
+                  <tr key={j.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                    <td className="px-4 py-3 text-sm text-gray-400">{j.id}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-navy">{j.title}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{j.department}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{j.location}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{j.job_type}</td>
+                    <td className="px-4 py-3"><span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium border capitalize ${statusColors[j.status]}`}>{j.status}</span></td>
+                    <td className="px-4 py-3 text-xs text-gray-400">{j.deadline ? new Date(j.deadline).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => toggleStatus(j.id)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-primary" title="Toggle status">
+                          {j.status === 'active' ? <ToggleRight size={18} className="text-green-500" /> : <ToggleLeft size={18} />}
+                        </button>
+                        <button onClick={() => openEdit(j)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-blue-600"><Edit2 size={16} /></button>
+                        <button onClick={() => setDeleteConfirm(j.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600"><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {paginated.length === 0 && <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-400 text-sm">No jobs found.</td></tr>}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-400">Page {page} of {totalPages}</p>
+              <div className="flex gap-1"><button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronLeft size={16} /></button><button onClick={() => setPage(p => Math.min(totalPages,p+1))} disabled={page===totalPages} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronRight size={16} /></button></div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Delete Confirm */}
       {deleteConfirm && (

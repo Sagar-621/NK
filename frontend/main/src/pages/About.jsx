@@ -113,9 +113,8 @@ export default function About() {
               initial="initial" whileInView="whileInView" viewport={{ once: true, amount: 0.1 }}>
               {timeline.map((t, i) => (
                 <motion.div key={i} variants={childFade} className="flex gap-6 items-start">
-                  <div className={`w-12 h-12 rounded-full text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10 ${
-                    i % 2 === 0 ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-secondary shadow-lg shadow-secondary/30'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-full text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10 ${i % 2 === 0 ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-secondary shadow-lg shadow-secondary/30'
+                    }`}>
                     {t.year.slice(2)}
                   </div>
                   <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex-1 hover:shadow-md transition-shadow">

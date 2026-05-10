@@ -3,6 +3,7 @@ import { Smartphone, ShoppingCart, CreditCard, Bike, PackageCheck, MapPin, Phone
 import GlassCard from '../components/ui/GlassCard'
 import AnimatedCounter from '../components/ui/AnimatedCounter'
 import Button from '../components/ui/Button'
+import { SubmittingSkeleton } from '../components/ui/Skeleton'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -25,8 +26,8 @@ const childFade = {
 // ===================== HERO =====================
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center hero-gradient grid-dots overflow-hidden pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
+    <section className="relative min-h-screen flex items-center hero-gradient grid-dots overflow-hidden pt-16 sm:pt-20 lg:pt-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-0">
         <div className="grid lg:grid-cols-5 gap-12 lg:gap-8 items-center">
           {/* LEFT — Copy (60%) */}
           <motion.div className="lg:col-span-3 space-y-8" {...fadeInUp}>
@@ -46,7 +47,7 @@ function HeroSection() {
               Fresh groceries,{' '}
               <br className="hidden sm:block" />
               delivered in{' '}
-              <span className="text-primary wave-underline">minutes</span>
+              <span className="text-green-600 wave-underline">minutes</span>
             </h1>
 
             {/* Subheadline */}
@@ -310,14 +311,12 @@ function StatsSection() {
 function ContactSection() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '', _honey: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData._honey) {
-      setSubmitted(true)
-      return
-    }
-
+    if (formData._honey) { setSubmitted(true); return }
+    setIsSubmitting(true)
     try {
       const response = await fetch('/api/contact-inquiries', {
         method: 'POST',
@@ -325,8 +324,10 @@ function ContactSection() {
         body: JSON.stringify({
           full_name: formData.name,
           email: formData.email,
-          phone: formData.phone,
-          message: formData.message
+          phone: formData.phone || null,
+          subject: 'Website Inquiry (Home)',
+          message: formData.message,
+          is_bot: 0
         })
       });
 
@@ -338,15 +339,16 @@ function ContactSection() {
         alert('Failed to send message. Please try again.');
       }
     } catch (err) {
-      console.error('Contact error:', err);
-      alert('An error occurred. Please check your connection.');
+      alert('Failed to send. Please try again.');
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const contactInfo = [
-    { icon: MapPin, label: 'Our Office', value: '123 Commerce Street, Tech Hub, Bangalore 560001' },
-    { icon: Phone, label: 'Phone', value: '+91 98765 43210' },
-    { icon: Mail, label: 'Email', value: 'hello@natookart.com' },
+    
+    { icon: Phone, label: 'Phone', value: '+91 9347111819' },
+    { icon: Mail, label: 'Email', value: 'support@natookart.com' },
   ]
 
   return (
@@ -363,7 +365,9 @@ function ContactSection() {
         <div className="grid lg:grid-cols-5 gap-12">
           <motion.div className="lg:col-span-3" {...fadeInUp}>
             <div className="bg-white rounded-3xl shadow-contact p-8 sm:p-10" style={{ transform: 'rotateX(1deg)' }}>
-              {submitted ? (
+              {isSubmitting ? (
+                <SubmittingSkeleton label="Sending message..." />
+              ) : submitted ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

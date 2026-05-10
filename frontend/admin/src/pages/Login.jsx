@@ -96,7 +96,7 @@ export default function Login() {
           <img
             src="/logos/company-logo.png"
             alt="NatooKart"
-            className="h-28 w-auto object-contain mx-auto mb-2"
+            className="h-48 w-auto object-contain mx-auto mb-2"
           />
           <h1 className="text-2xl font-bold text-navy">Admin Login</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to NatooKart Admin Panel</p>

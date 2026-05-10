@@ -62,4 +62,9 @@ export const api = {
   getInquiries:   ()           => request('/contact-inquiries'),
   updateInquiry:  (id, status, replied_by) => request(`/contact-inquiries/${id}`, { method: 'PATCH', body: { status, replied_by } }),
   deleteInquiry:  (id)         => request(`/contact-inquiries/${id}`, { method: 'DELETE' }),
+
+  // Job Applications
+  getJobApplications:    ()          => request('/job-applications'),
+  updateApplicationStatus: (id, status) => request(`/job-applications/${id}`, { method: 'PATCH', body: { status } }),
+  deleteJobApplication:  (id)        => request(`/job-applications/${id}`, { method: 'DELETE' }),
 }

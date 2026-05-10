@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Store, Bike, Briefcase, MessageSquare, Settings, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Store, Bike, Briefcase, ClipboardList, MessageSquare, Settings, LogOut, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/merchants', icon: Store, label: 'Merchants' },
   { to: '/delivery-partners', icon: Bike, label: 'Delivery Partners' },
   { to: '/jobs', icon: Briefcase, label: 'Job Postings' },
+  { to: '/job-applications', icon: ClipboardList, label: 'Applications' },
   { to: '/contact-inquiries', icon: MessageSquare, label: 'Inquiries' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ]
@@ -19,9 +20,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {/* Logo */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center">
-          {/* Collapsed: n-logo icon only */}
-          <img src="/logos/n-logo.png" alt="NatooKart" className="w-9 h-9 rounded-lg object-cover flex-shrink-0 xl:hidden" />
-          {/* Expanded: full company logo on white bg */}
+          {/* Mobile drawer: full company logo (drawer is w-64, enough space) */}
+          <div className="bg-white rounded-xl px-3 py-1.5 lg:hidden">
+            <img src="/logos/company-logo.png" alt="NatooKart" className="h-10 w-auto object-contain" />
+          </div>
+          {/* Desktop collapsed (lg→xl): n-logo icon only */}
+          <img src="/logos/n-logo.png" alt="NatooKart" className="w-10 h-10 rounded-lg object-cover flex-shrink-0 hidden lg:block xl:hidden" />
+          {/* Desktop expanded (xl+): full company logo */}
           <div className="bg-white rounded-xl px-3 py-1.5 hidden xl:block">
             <img src="/logos/company-logo.png" alt="NatooKart" className="h-10 w-auto object-contain" />
           </div>
@@ -48,7 +53,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
             }
           >
             <item.icon size={20} className="flex-shrink-0" />
-            <span className="lg:block hidden xl:block">{item.label}</span>
+            <span className="lg:hidden xl:block">{item.label}</span>
           </NavLink>
         ))}
       </nav>
@@ -59,7 +64,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           <div className="w-8 h-8 bg-secondary/30 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             {user?.name?.charAt(0) || 'A'}
           </div>
-          <div className="lg:block hidden xl:block min-w-0">
+          <div className="lg:hidden xl:block min-w-0">
             <p className="text-sm font-medium text-white truncate">{user?.name || 'Admin'}</p>
             <p className="text-xs text-gray-500 truncate">{user?.role || 'admin'}</p>
           </div>
@@ -69,7 +74,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all w-full"
         >
           <LogOut size={20} className="flex-shrink-0" />
-          <span className="lg:block hidden xl:block">Logout</span>
+          <span className="lg:hidden xl:block">Logout</span>
         </button>
       </div>
     </div>
@@ -78,7 +83,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-0 top-0 bottom-0 w-16 xl:w-64 z-30 transition-all duration-300">
+      <aside className="hidden lg:block fixed left-0 top-0 bottom-0 w-16 xl:w-64 z-30 transition-all duration-300 border-r border-white/10">
         {sidebarContent}
       </aside>
 

@@ -1,7 +1,7 @@
 -- ============================================================
--- FreshCart Grocery Platform — MySQL Schema
--- Version: 1.0.0
--- Generated: 2026-05-02
+-- NatooKart Grocery Platform — MySQL Schema
+-- Version: 1.1.0
+-- Updated: 2026-05-09
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS grocery_platform
@@ -24,19 +24,21 @@ CREATE TABLE IF NOT EXISTS roles (
 -- TABLE: admins
 -- ============================================================
 CREATE TABLE IF NOT EXISTS admins (
-  id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  first_name    VARCHAR(100)    DEFAULT NULL,
-  last_name     VARCHAR(100)    DEFAULT NULL,
-  name          VARCHAR(100)    NOT NULL,
-  email         VARCHAR(255)    NOT NULL,
-  password_hash VARCHAR(255)    NOT NULL COMMENT 'bcrypt hash',
-  role          ENUM('super_admin','editor') NOT NULL DEFAULT 'editor',
-  role_id       INT UNSIGNED    DEFAULT NULL,
-  avatar_url    VARCHAR(500)    DEFAULT NULL,
-  is_active     BOOLEAN         NOT NULL DEFAULT TRUE,
-  last_login    DATETIME        DEFAULT NULL,
-  created_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id                INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  first_name        VARCHAR(100)    DEFAULT NULL,
+  last_name         VARCHAR(100)    DEFAULT NULL,
+  name              VARCHAR(100)    NOT NULL,
+  email             VARCHAR(255)    NOT NULL,
+  password_hash     VARCHAR(255)    NOT NULL COMMENT 'bcrypt hash',
+  role              ENUM('super_admin','editor') NOT NULL DEFAULT 'editor',
+  role_id           INT UNSIGNED    DEFAULT NULL,
+  avatar_url        VARCHAR(500)    DEFAULT NULL,
+  support_email     VARCHAR(255)    DEFAULT NULL,
+  smtp_app_password VARCHAR(255)    DEFAULT NULL,
+  is_active         BOOLEAN         NOT NULL DEFAULT TRUE,
+  last_login        DATETIME        DEFAULT NULL,
+  created_at        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   UNIQUE INDEX idx_admins_email (email),
   CONSTRAINT fk_admins_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
@@ -65,7 +67,10 @@ CREATE TABLE IF NOT EXISTS merchants (
   owner_name      VARCHAR(150)    NOT NULL,
   mobile          VARCHAR(15)     NOT NULL,
   email           VARCHAR(255)    NOT NULL,
-  id_proof_url    VARCHAR(500)    DEFAULT NULL,
+  id_proof_url    VARCHAR(500)    DEFAULT NULL COMMENT 'Serve endpoint: /api/merchants/:id/id-proof',
+  id_proof_data   LONGBLOB        DEFAULT NULL COMMENT 'Raw binary data stored in DB as BLOB',
+  id_proof_mime   VARCHAR(100)    DEFAULT NULL COMMENT 'MIME type of uploaded proof',
+  id_proof_file_id VARCHAR(255)   DEFAULT NULL COMMENT 'Legacy field — not used',
   address_line1   VARCHAR(300)    NOT NULL,
   address_line2   VARCHAR(300)    DEFAULT NULL,
   city            VARCHAR(100)    NOT NULL,
@@ -95,6 +100,14 @@ CREATE TABLE IF NOT EXISTS delivery_partners (
   email           VARCHAR(255)    DEFAULT NULL,
   city            VARCHAR(100)    NOT NULL,
   vehicle_type    ENUM('Bike','Scooter','Bicycle','Car') NOT NULL,
+  -- Eligibility / ID fields (collected from registration form)
+  date_of_birth   DATE            DEFAULT NULL,
+  id_type         ENUM('Aadhaar','PAN','Driving License') DEFAULT NULL,
+  id_number       VARCHAR(30)     DEFAULT NULL,
+  has_smartphone  BOOLEAN         NOT NULL DEFAULT FALSE,
+  flexible_hours  BOOLEAN         NOT NULL DEFAULT FALSE,
+  clean_record    BOOLEAN         NOT NULL DEFAULT FALSE,
+  -- Status & review
   status          ENUM('pending','active','rejected') NOT NULL DEFAULT 'pending',
   rejection_note  TEXT            DEFAULT NULL,
   reviewed_by     INT UNSIGNED    DEFAULT NULL,

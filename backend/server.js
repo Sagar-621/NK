@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const db = require('./db');
 const authMiddleware = require('./middleware/auth');
+const { bootstrapMailerRuntimeConfig } = require('./services/mailer');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -57,7 +58,12 @@ app.use('/api/dashboard', authMiddleware, require('./routes/dashboard'));
 app.use('/api/merchants', require('./routes/merchants'));
 app.use('/api/delivery-partners', require('./routes/partners'));
 app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/job-applications', require('./routes/jobApplications'));
 app.use('/api/contact-inquiries', require('./routes/inquiries'));
+
+bootstrapMailerRuntimeConfig().catch((err) => {
+    console.error('[MAIL] Runtime bootstrap failed:', err.message);
+});
 
 // Note: If some GET routes should be public (e.g. jobs for the careers page), 
 // we should handle that in the route files themselves or split them.

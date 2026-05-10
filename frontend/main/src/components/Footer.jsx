@@ -51,8 +51,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-5">
             <Link to="/">
-              <div className="bg-white rounded-2xl px-4 py-2 inline-block">
-                <img src="/logos/company-logo.png" alt="NatooKart" className="h-14 w-auto object-contain" />
+              <div className="bg-white rounded-xl p-2 inline-flex items-center justify-center w-20 h-14">
+                <img src="/logos/company-logo.png" alt="NatooKart" className="w-full h-full object-contain" />
               </div>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
@@ -87,7 +87,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} className="text-gray-300 hover:text-primary-200 transition-colors text-sm">
+                  <Link to={link.to} className="text-gray-600 hover:text-primary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -101,7 +101,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {legalLinks.map((link) => (
                 <li key={link.label}>
-                  <Link to={link.to} className="text-gray-300 hover:text-primary-200 transition-colors text-sm">
+                  <Link to={link.to} className="text-gray-600 hover:text-primary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -128,8 +128,8 @@ export default function Footer() {
             </div>
             <div className="mt-6">
               <p className="text-gray-400 text-sm">Have a question?</p>
-              <a href="mailto:hello@natookart.com" className="text-secondary hover:underline text-sm font-medium">
-                hello@natookart.com
+              <a href="mailto:support@natookart.com" className="text-secondary hover:underline text-sm font-medium">
+                support@natookart.com
               </a>
             </div>
           </div>

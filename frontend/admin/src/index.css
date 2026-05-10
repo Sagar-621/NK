@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
 html { scroll-behavior: smooth; }
 body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 
@@ -21,3 +22,9 @@ body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: anti
 
 @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 .animate-slideDown { animation: slideDown 0.3s ease-out; }
+
+@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.animate-shimmer { animation: shimmer 1.6s ease-in-out infinite; }

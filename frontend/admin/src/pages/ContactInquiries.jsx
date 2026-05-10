@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { Search, Eye, Trash2, Mail, CheckCircle, X, ExternalLink, Loader2 } from 'lucide-react'
+import { Search, Eye, Trash2, Mail, CheckCircle, X, ExternalLink } from 'lucide-react'
 import { api } from '../api'
 import { useAuth } from '../context/AuthContext'
+import { SkeletonInquiryItem } from '../components/Skeleton'
 
 const statusColors = {
   unread:  'bg-blue-50 text-blue-600 border-blue-200',
@@ -60,12 +61,6 @@ export default function ContactInquiries() {
     } catch (e) { alert(e.message) }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-32">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
-  )
-
   if (error) return (
     <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-sm">{error}</div>
   )
@@ -74,7 +69,9 @@ export default function ContactInquiries() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-navy">Contact Inquiries</h2>
-        <p className="text-sm text-gray-500">{inquiries.filter(i => i.status === 'unread').length} unread messages</p>
+        <p className="text-sm text-gray-500">
+          {loading ? '…' : `${inquiries.filter(i => i.status === 'unread').length} unread messages`}
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -92,25 +89,31 @@ export default function ContactInquiries() {
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Messages List */}
         <div className="lg:col-span-2 space-y-2">
-          {filtered.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400 text-sm">No messages found.</div>
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => <SkeletonInquiryItem key={i} />)
+          ) : (
+            <>
+              {filtered.length === 0 && (
+                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400 text-sm">No messages found.</div>
+              )}
+              {filtered.map(i => (
+                <button key={i.id} onClick={() => handleSelect(i)}
+                  className={`w-full text-left bg-white rounded-xl border p-4 transition-all hover:shadow-md ${selected?.id === i.id ? 'border-primary ring-1 ring-primary/20' : 'border-gray-100'} ${i.status === 'unread' ? 'border-l-4 border-l-blue-500' : ''}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className={`text-sm truncate ${i.status === 'unread' ? 'font-bold text-navy' : 'font-medium text-gray-700'}`}>{i.full_name}</p>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{i.subject || 'No subject'}</p>
+                    </div>
+                    <span className={`flex-shrink-0 inline-flex px-2 py-0.5 rounded-md text-[10px] font-medium border capitalize ${statusColors[i.status]}`}>{i.status}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2 line-clamp-2">{i.message}</p>
+                  <p className="text-[10px] text-gray-300 mt-2">
+                    {new Date(i.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </button>
+              ))}
+            </>
           )}
-          {filtered.map(i => (
-            <button key={i.id} onClick={() => handleSelect(i)}
-              className={`w-full text-left bg-white rounded-xl border p-4 transition-all hover:shadow-md ${selected?.id === i.id ? 'border-primary ring-1 ring-primary/20' : 'border-gray-100'} ${i.status === 'unread' ? 'border-l-4 border-l-blue-500' : ''}`}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className={`text-sm truncate ${i.status === 'unread' ? 'font-bold text-navy' : 'font-medium text-gray-700'}`}>{i.full_name}</p>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">{i.subject || 'No subject'}</p>
-                </div>
-                <span className={`flex-shrink-0 inline-flex px-2 py-0.5 rounded-md text-[10px] font-medium border capitalize ${statusColors[i.status]}`}>{i.status}</span>
-              </div>
-              <p className="text-xs text-gray-400 mt-2 line-clamp-2">{i.message}</p>
-              <p className="text-[10px] text-gray-300 mt-2">
-                {new Date(i.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </button>
-          ))}
         </div>
 
         {/* Detail Panel */}

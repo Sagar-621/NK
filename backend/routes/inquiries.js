@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
+const { sendWelcomeEmail, sendAdminNotification } = require('../services/mailer');
+const { normalizeIndianMobile, sendTransactionalSms } = require('../services/sms');
 
 // GET /api/contact-inquiries (Protected)
 router.get('/', authMiddleware, async (req, res) => {
@@ -27,6 +29,50 @@ router.post('/', async (req, res) => {
             [full_name, email, phone || null, subject || null, message, is_bot ? 1 : 0]
         );
         const [rows] = await db.execute('SELECT * FROM contact_inquiries WHERE id = ?', [result.insertId]);
+
+        if (!is_bot) {
+            const adminTo = String(process.env.SUPPORT_EMAIL || process.env.ADMIN_SUPPORT_EMAIL || '').trim();
+            const deliveryResults = await Promise.allSettled([
+                sendWelcomeEmail({
+                    to: email,
+                    name: full_name,
+                    subject: 'We received your message',
+                    intro: 'Thanks for reaching out to NatooKart. Our team will review your message and get back to you soon.',
+                    bodyLines: [
+                        `Subject: ${subject || 'General enquiry'}`,
+                        'We typically reply within 24 hours.'
+                    ],
+                    ctaLabel: 'Visit NatooKart',
+                    ctaHref: process.env.FRONTEND_URL || process.env.PUBLIC_SITE_URL || 'http://localhost:5173',
+                    footer: 'This is an automated acknowledgement of your contact request.',
+                }),
+                sendAdminNotification({
+                    to: adminTo,
+                    subject: `New Contact Enquiry - ${full_name}`,
+                    intro: 'A customer submitted a contact form.',
+                    rows: [
+                        ['Name', full_name],
+                        ['Email', email],
+                        ['Phone', phone || '—'],
+                        ['Subject', subject || '—'],
+                    ],
+                    footer: 'Please review the contact inquiry from the admin dashboard.',
+                }),
+                normalizeIndianMobile(phone)
+                    ? sendTransactionalSms({
+                        mobile: phone,
+                        purpose: 'notification',
+                        message: `Hi ${full_name || 'there'}, thanks for contacting NatooKart. We received your message and will reply soon.`,
+                    })
+                    : Promise.resolve({ skipped: true })
+            ]);
+            deliveryResults.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    console.error(`[CONTACT NOTIFY] delivery #${index + 1} failed:`, result.reason?.message || result.reason || 'Unknown error');
+                }
+            });
+        }
+
         res.status(201).json(rows[0]);
     } catch (err) {
         console.error('Create inquiry error:', err);

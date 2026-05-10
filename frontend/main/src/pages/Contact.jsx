@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react'
 import Button from '../components/ui/Button'
+import { SubmittingSkeleton } from '../components/ui/Skeleton'
 
 const fadeInUp = { initial: { opacity: 0, y: 40 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.2 }, transition: { duration: 0.7, ease: [0.23, 1, 0.32, 1] } }
 const childFade = { initial: { opacity: 0, y: 30 }, whileInView: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } }
@@ -16,11 +17,13 @@ const contactInfo = [
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '', _honey: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     // Honeypot — silently reject bots
     if (formData._honey) { setSubmitted(true); return }
+    setIsSubmitting(true)
     try {
       const res = await fetch('/api/contact-inquiries', {
         method: 'POST',
@@ -41,6 +44,8 @@ export default function Contact() {
     } catch (err) {
       console.error('Contact form error:', err)
       alert('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -80,7 +85,9 @@ export default function Contact() {
             </motion.div>
 
             <motion.div className="bg-white rounded-3xl shadow-contact p-8 sm:p-10" {...fadeInUp}>
-              {submitted ? (
+              {isSubmitting ? (
+                <SubmittingSkeleton label="Sending your message..." />
+              ) : submitted ? (
                 <div className="text-center py-16">
                   <div className="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Send size={32} className="text-secondary" />
